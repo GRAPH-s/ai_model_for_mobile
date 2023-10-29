@@ -399,3 +399,4 @@ fabric.properties
 
 .venv
 *.pth
+*.ipynb
