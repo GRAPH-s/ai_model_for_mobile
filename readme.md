@@ -7,5 +7,5 @@ echo 'GIGA_CREDENTIALS = "YOUR_KEY" ' > .env
 2. Запуск докера. Назову образ `fastapi-app`, а контейнер `mycontainer`
 ```bash
 docker build -t fastapi-app .
-docker run -d --name mycontainer -p 8000:80 fastapi-app
+docker run -d --name mycontainer -p 8800:80 fastapi-app
 ```

@@ -30,7 +30,7 @@ class Sam:
             return image_cv2
         except Exception as err:
             print("ошибка при загрузке изображения:", err)
-            return
+            raise err
 
     def get_list_of_objects(self, image):
         masks = self.mask_generator.generate(image)

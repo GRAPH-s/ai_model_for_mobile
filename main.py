@@ -24,9 +24,12 @@ chat_1 = chat_description.Description(instruction=instruction_1)
 
 
 @app.post("/api/without_input/")
-async def root(objects: Objects):
-    image = sam.download_image(objects.image_url)
-    objects_on_image = ", ".join(sam.get_list_of_objects(image))
+def root(objects: Objects):
+    try:
+        image = sam.download_image(objects.image_url)
+    except Exception as e:
+        return {"error": e}
+    objects_on_image = ", ".join( sam.get_list_of_objects(image))
     description = chat_1.get_description(objects_on_image)
     return {"description": description}
 
@@ -43,8 +46,11 @@ chat_2 = chat_description.Description(instruction=instruction_2)
 
 
 @app.post("/api/with_input/")
-async def root(objects: Objects):
-    image = sam.download_image(objects.image_url)
+def root(objects: Objects):
+    try:
+        image = sam.download_image(objects.image_url)
+    except Exception as e:
+        return {"error": e}
     objects_on_image = ", ".join(sam.get_list_of_objects(image))
     beginning = objects.description + ";" + objects_on_image
     description = chat_2.get_description(beginning)
