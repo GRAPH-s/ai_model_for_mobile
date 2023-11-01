@@ -9,15 +9,13 @@ from segment_anything import sam_model_registry, SamAutomaticMaskGenerator, SamP
 import os
 
 
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-
-
 class Sam:
-    def __init__(self, model_path="sam_vit_h_4b8939.pth", model_type="vit_h"):
-        sam = sam_model_registry[model_type](checkpoint=model_path).to(device)
+    def __init__(self, model_path="sam_vit_h_4b8939.pth", model_type="vit_h", cuda="cuda:0"):
+        self.device = torch.device(cuda if torch.cuda.is_available() else "cpu")
+        sam = sam_model_registry[model_type](checkpoint=model_path).to(self.device)
         self.mask_generator = SamAutomaticMaskGenerator(sam)
         self.weights = RegNet_Y_128GF_Weights.DEFAULT
-        self.model = regnet_y_128gf(weights=self.weights).to(device).eval()
+        self.model = regnet_y_128gf(weights=self.weights).to(self.device).eval()
         self.transform = self.weights.transforms()
 
     @staticmethod
@@ -50,7 +48,7 @@ class Sam:
             input_image = Image.fromarray(img)
             input_tensor = self.transform(input_image).unsqueeze(0)
             with torch.no_grad():
-                prediction = self.model(input_tensor.to(device)).squeeze(0).softmax(0)
+                prediction = self.model(input_tensor.to(self.device)).squeeze(0).softmax(0)
 
             class_id = torch.argmax(prediction).item()
             category_name = self.weights.meta["categories"][class_id]
