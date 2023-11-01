@@ -11,7 +11,8 @@ class Objects(BaseModel):
 
 
 app = FastAPI()
-sam = Sam(cuda="cuda:0") # на серваке две карточки
+sam = Sam(cuda="cuda:0", # на серваке две карточки 1,2
+          accuracy_threshold=0.85)
 
 instruction_1 = """
 Тебе необходимо от первого лица создать креативное описание на русском языке к фотографии, 
