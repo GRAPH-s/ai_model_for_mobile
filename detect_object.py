@@ -9,15 +9,18 @@ from segment_anything import sam_model_registry, SamAutomaticMaskGenerator, SamP
 import os
 
 
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-
-
 class Sam:
-    def __init__(self, model_path="sam_vit_h_4b8939.pth", model_type="vit_h"):
-        sam = sam_model_registry[model_type](checkpoint=model_path).to(device)
+    def __init__(self,
+                 model_path="sam_vit_h_4b8939.pth",
+                 model_type="vit_h",
+                 cuda="cuda:0",
+                 accuracy_threshold=0.85):
+        self.device = torch.device(cuda if torch.cuda.is_available() else "cpu")
+        sam = sam_model_registry[model_type](checkpoint=model_path).to(self.device)
+        self.accuracy_threshold = accuracy_threshold
         self.mask_generator = SamAutomaticMaskGenerator(sam)
         self.weights = RegNet_Y_128GF_Weights.DEFAULT
-        self.model = regnet_y_128gf(weights=self.weights).to(device).eval()
+        self.model = regnet_y_128gf(weights=self.weights).to(self.device).eval()
         self.transform = self.weights.transforms()
 
     @staticmethod
@@ -36,7 +39,7 @@ class Sam:
         masks = self.mask_generator.generate(image)
         masks = sorted(masks, key=(lambda x: x['area']), reverse=True)
 
-        current_image = []
+        current_image = [image]
         for mask in masks:
             mask = mask['segmentation']
             height, width = mask.shape
@@ -45,16 +48,21 @@ class Sam:
             object_only = cv2.bitwise_and(image, image, mask=object_image)
             current_image.append(object_only)
 
-        category_names = set()
-        for img in current_image:
+        category_names = {}
+        for img in current_image[:20]:
             input_image = Image.fromarray(img)
             input_tensor = self.transform(input_image).unsqueeze(0)
             with torch.no_grad():
-                prediction = self.model(input_tensor.to(device)).squeeze(0).softmax(0)
+                prediction = self.model(input_tensor.to(self.device)).squeeze(0).softmax(0)
 
             class_id = torch.argmax(prediction).item()
+            score = prediction[class_id].item()
             category_name = self.weights.meta["categories"][class_id]
-            category_names.add(category_name)
+            category_names[category_name] = score
+            # category_names.add(category_name)
 
-        return list(category_names)
+        filtered_categories = {category_name: score
+                               for category_name, score in category_names.items()
+                               if score >= self.accuracy_threshold}
+        return set(filtered_categories.keys())
 
