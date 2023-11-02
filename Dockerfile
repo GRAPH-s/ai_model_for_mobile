@@ -1,10 +1,13 @@
-FROM pytorch/pytorch:latest
+FROM nvidia/cuda:11.4.0-base-ubuntu20.04 as builder
 
 RUN export DEBIAN_FRONTEND=noninteractive && \
     apt-get update && \
     apt-get install -y git wget libgl1-mesa-glx libglib2.0-0 && \
     rm -rf /var/lib/apt/lists/*
 
+FROM pytorch/pytorch:latest
+
+COPY --from=builder / /
 WORKDIR /app
 COPY . /app
 
