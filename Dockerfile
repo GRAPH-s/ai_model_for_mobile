@@ -3,7 +3,7 @@ FROM pytorch/pytorch:latest
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y git python3-pip python3-dev python3-opencv wget libgl1-mesa-glx libglib2.0-0 curl gnupg
 RUN python3 -m pip install --upgrade pip
-RUN sudo apt-get install nvidia-driver && apt-get install nvidia-modprobe
+RUN apt-get install nvidia-driver && apt-get install nvidia-modprobe
 
 WORKDIR /app
 COPY . /app
