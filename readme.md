@@ -9,5 +9,5 @@ echo 'GIGA_CREDENTIALS = "YOUR_KEY" ' > .env
 docker build -t fastapi-app .
 ```
 ```bash
-docker run -d --gpus all --name mycontainer -p 8800:80 fastapi-app
+docker run -d --gpus all -rm --name mycontainer -p 8800:80 fastapi-app
 ```
