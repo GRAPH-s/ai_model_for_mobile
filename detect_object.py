@@ -72,7 +72,8 @@ class Sam:
             score = prediction[class_id].item()
             category_name = self.weights.meta["categories"][class_id]
             category_names[category_name] = score
-            logging.info(f"Закончилась классификация объектов")
+            logging.info(f"Найден объект {category_name} с вероятностью {round(score, 4)}")
+        logging.info(f"Закончилась классификация объектов")
 
         filtered_categories = {category_name: score
                                for category_name, score in category_names.items()
