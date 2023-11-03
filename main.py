@@ -33,7 +33,9 @@ def root(objects: Objects):
         return JSONResponse(content={"error": image}, status_code=400)
     objects_on_image = ", ".join( sam.get_list_of_objects(image))
     description = chat_1.get_description(objects_on_image)
-    return JSONResponse(content={"description": description}, status_code=200)
+    return JSONResponse(content={"description": description,
+                                 "detected objects": objects_on_image},
+                        status_code=200)
 
 
 instruction_2 = """
@@ -57,5 +59,7 @@ def root(objects: Objects):
     objects_on_image = ", ".join(sam.get_list_of_objects(image))
     beginning = objects.description + ";" + objects_on_image
     description = chat_2.get_description(beginning)
-    return JSONResponse(content={"description": description}, status_code=200)
+    return JSONResponse(content={"description": description,
+                                 "detected objects": objects_on_image},
+                        status_code=200)
 
