@@ -13,7 +13,7 @@ class Objects(BaseModel):
 
 accuracy_threshold = 0.85
 app = FastAPI()
-sam = Sam(cuda="cuda:0", # 0 или 1
+sam = Sam(cuda="cuda:1", # 0 или 1
           accuracy_threshold=accuracy_threshold,
           n_objects=5)
 
