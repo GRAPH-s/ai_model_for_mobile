@@ -43,6 +43,7 @@ def root(objects: Objects):
     description = chat_1.get_description(objects_on_image)
     if len(objects_on_image) == 0:
         objects_on_image = f"Не смог ничего обнаружить с точностью: {objects.accuracy_threshold}"
+        return JSONResponse(content={"detected objects": objects_on_image}, status_code=200)
     return JSONResponse(content={"description": description,
                                  "detected objects": objects_on_image},
                         status_code=200)
@@ -74,6 +75,7 @@ def root(objects: Objects):
     description = chat_2.get_description(beginning)
     if len(objects_on_image) == 0:
         objects_on_image = f"Не смог ничего обнаружить с точностью: {objects.accuracy_threshold}"
+        return JSONResponse(content={"detected objects": objects_on_image}, status_code=200)
     return JSONResponse(content={"description": description,
                                  "detected objects": objects_on_image},
                         status_code=200)
