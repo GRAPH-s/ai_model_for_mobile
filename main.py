@@ -1,3 +1,4 @@
+from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
@@ -12,8 +13,10 @@ class Objects(BaseModel):
 
 
 accuracy_threshold = 0.85
+load_dotenv(".env")
+CUDA = os.getenv("CUDA")
 app = FastAPI()
-sam = Sam(cuda="cuda:1", # 0 или 1
+sam = Sam(cuda=CUDA,
           accuracy_threshold=accuracy_threshold,
           n_objects=5)
 

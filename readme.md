@@ -11,9 +11,11 @@ sudo nvidia-ctk runtime configure --runtime=docker
 sudo systemctl restart docker
 ```
 
-2. Необходимо создать файл `.env` и присвоить туда ключ в base64 на [сайте](https://developers.sber.ru/studio/workspaces/my-space/get/gigachat-api)
+2. Необходимо создать файл `.env` и присвоить туда ключ в base64 на [сайте](https://developers.sber.ru/studio/workspaces/my-space/get/gigachat-api).
+И прописать какую видеокарту хотите использовать.
 ```bash
 echo 'GIGA_CREDENTIALS = "YOUR_KEY" ' > .env
+echo 'CUDA = "cuda:1" ' > .env
 ```
 3. Запуск докера. Назову образ `fastapi-app`, а контейнер `mycontainer`
 ```bash
