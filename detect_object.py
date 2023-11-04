@@ -48,6 +48,7 @@ class Sam:
         masks = sorted(masks, key=(lambda x: x['area']), reverse=True)
         logging.info(f"Закончилась генерация масок")
 
+        logging.info(f"Найдено масок: {len(masks)}")
         current_image = [image]
         for mask in masks:
             mask = mask['segmentation']
