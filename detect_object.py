@@ -16,15 +16,11 @@ class Sam:
     def __init__(self,
                  model_path="sam_vit_h_4b8939.pth",
                  model_type="vit_h",
-                 cuda="cuda:0",
-                 accuracy_threshold=0.85,
-                 n_objects=5):
+                 cuda="cuda:0"):
         logging.info(f"Доступна ли видеокарта? Ответ: {torch.cuda.is_available()}")
         self.device = torch.device(cuda if torch.cuda.is_available() else "cpu")
         logging.info(f"Началась загрузка SAM")
         sam = sam_model_registry[model_type](checkpoint=model_path).to(self.device)
-        self.accuracy_threshold = accuracy_threshold
-        self.n_objects = n_objects
         self.mask_generator = SamAutomaticMaskGenerator(sam)
         self.weights = RegNet_Y_128GF_Weights.DEFAULT
         self.model = regnet_y_128gf(weights=self.weights).to(self.device).eval()
@@ -45,7 +41,7 @@ class Sam:
             logging.info(f"Ошибка при загрузке изображения: {err}")
             return "Ошибка при загрузке изображения. Недействительный URL или изображение не доступно."
 
-    def get_list_of_objects(self, image):
+    def get_list_of_objects(self, image, accuracy_threshold=0.85, number_objects=5):
         logging.info(f"Началась генерация масок")
         masks = self.mask_generator.generate(image)
         masks = sorted(masks, key=(lambda x: x['area']), reverse=True)
@@ -62,7 +58,7 @@ class Sam:
 
         category_names = {}
         logging.info(f"Началась классификация объектов")
-        for img in current_image[:self.n_objects]:
+        for img in current_image[:number_objects]:
             input_image = Image.fromarray(img)
             input_tensor = self.transform(input_image).unsqueeze(0)
             with torch.no_grad():
@@ -77,6 +73,6 @@ class Sam:
 
         filtered_categories = {category_name: score
                                for category_name, score in category_names.items()
-                               if score >= self.accuracy_threshold}
+                               if score >= accuracy_threshold}
         return set(filtered_categories.keys())
 

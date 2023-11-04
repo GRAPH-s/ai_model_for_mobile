@@ -1,4 +1,5 @@
 from dotenv import load_dotenv
+import os
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
@@ -10,15 +11,15 @@ from detect_object import Sam
 class Objects(BaseModel):
     description: Union[str, None] = None
     image_url: Union[str, None] = None
+    accuracy_threshold: Union[float, None] = 0.85
+    number_objects: Union[int, None] = 5
 
 
-accuracy_threshold = 0.85
 load_dotenv(".env")
 CUDA = os.getenv("CUDA")
 app = FastAPI()
-sam = Sam(cuda=CUDA,
-          accuracy_threshold=accuracy_threshold,
-          n_objects=5)
+sam = Sam(cuda=CUDA)
+
 
 instruction_1 = """
 Тебе необходимо от первого лица создать креативное описание на русском языке к фотографии, 
@@ -35,10 +36,13 @@ def root(objects: Objects):
     image = sam.download_image(objects.image_url)
     if isinstance(image, str):
         return JSONResponse(content={"error": image}, status_code=400)
-    objects_on_image = ", ".join( sam.get_list_of_objects(image))
+    objects_on_image = sam.get_list_of_objects(image=image,
+                                               accuracy_threshold=objects.accuracy_threshold,
+                                               number_objects=objects.number_objects)
+    objects_on_image = ", ".join(objects_on_image)
     description = chat_1.get_description(objects_on_image)
     if len(objects_on_image) == 0:
-        objects_on_image = f"Не смог ничего обнаружить с точностью: {accuracy_threshold}"
+        objects_on_image = f"Не смог ничего обнаружить с точностью: {objects.accuracy_threshold}"
     return JSONResponse(content={"description": description,
                                  "detected objects": objects_on_image},
                         status_code=200)
@@ -62,11 +66,14 @@ def root(objects: Objects):
         return JSONResponse(content={"error": "Описание не может быть пустым"}, status_code=400)
     if isinstance(image, str):
         return JSONResponse(content={"error": image}, status_code=400)
-    objects_on_image = ", ".join(sam.get_list_of_objects(image))
+    objects_on_image = sam.get_list_of_objects(image=image,
+                                               accuracy_threshold=objects.accuracy_threshold,
+                                               number_objects=objects.number_objects)
+    objects_on_image = ", ".join(objects_on_image)
     beginning = objects.description + ";" + objects_on_image
     description = chat_2.get_description(beginning)
     if len(objects_on_image) == 0:
-        objects_on_image = f"Не смог ничего обнаружить с точностью: {accuracy_threshold}"
+        objects_on_image = f"Не смог ничего обнаружить с точностью: {objects.accuracy_threshold}"
     return JSONResponse(content={"description": description,
                                  "detected objects": objects_on_image},
                         status_code=200)
