@@ -11,9 +11,10 @@ class Objects(BaseModel):
     image_url: Union[str, None] = None
 
 
+accuracy_threshold = 0.85
 app = FastAPI()
 sam = Sam(cuda="cuda:0", # 0 или 1
-          accuracy_threshold=0.85,
+          accuracy_threshold=accuracy_threshold,
           n_objects=5)
 
 instruction_1 = """
@@ -33,6 +34,8 @@ def root(objects: Objects):
         return JSONResponse(content={"error": image}, status_code=400)
     objects_on_image = ", ".join( sam.get_list_of_objects(image))
     description = chat_1.get_description(objects_on_image)
+    if len(objects_on_image) == 0:
+        objects_on_image = f"Не смог ничего обнаружить с точностью: {accuracy_threshold}"
     return JSONResponse(content={"description": description,
                                  "detected objects": objects_on_image},
                         status_code=200)
@@ -59,6 +62,8 @@ def root(objects: Objects):
     objects_on_image = ", ".join(sam.get_list_of_objects(image))
     beginning = objects.description + ";" + objects_on_image
     description = chat_2.get_description(beginning)
+    if len(objects_on_image) == 0:
+        objects_on_image = f"Не смог ничего обнаружить с точностью: {accuracy_threshold}"
     return JSONResponse(content={"description": description,
                                  "detected objects": objects_on_image},
                         status_code=200)
