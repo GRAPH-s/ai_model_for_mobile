@@ -1,8 +1,8 @@
-# noinspection PyInterpreter
 import numpy as np
 import torch
 import requests
-from torchvision.models import RegNet_Y_128GF_Weights, regnet_y_128gf
+# from torchvision.models import RegNet_Y_128GF_Weights, regnet_y_128gf
+from torchvision.models import ViT_H_14_Weights, vit_h_14
 from io import BytesIO
 import cv2
 from PIL import Image
@@ -23,8 +23,8 @@ class Sam:
         logging.info(f"Началась загрузка SAM")
         sam = sam_model_registry[model_type](checkpoint=model_path).to(self.device)
         self.mask_generator = SamAutomaticMaskGenerator(sam)
-        self.weights = RegNet_Y_128GF_Weights.DEFAULT
-        self.model = regnet_y_128gf(weights=self.weights).to(self.device).eval()
+        self.weights = ViT_H_14_Weights.IMAGENET1K_SWAG_E2E_V1
+        self.model = vit_h_14(weights=self.weights).to(self.device).eval()
         self.transform = self.weights.transforms()
         logging.info(f"закончилась загрузка SAM")
 
