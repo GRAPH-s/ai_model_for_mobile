@@ -31,7 +31,7 @@ def generate_description(image, model_path="BLIP/model_base_capfilt_large.pth"):
         print('caption: ' + caption[0])
 
 
-device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+device = torch.device('cuda:1' if torch.cuda.is_available() else 'cpu')
 url = "https://gorodprima.ru/wp-content/uploads/2022/10/4.jpg"
 image = load_image(img_url=url,image_size=image_size, device=device)
 generate_description(image, model_path)
