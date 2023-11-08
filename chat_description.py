@@ -16,17 +16,16 @@ GIGA_CREDENTIALS = os.getenv("GIGA_CREDENTIALS")
 
 
 class Description:
-    def __init__(self, instruction, temperature=0.7, max_tokens=300):
-        self.instruction = instruction
+    def __init__(self, temperature=0.7, max_tokens=300):
         self.temperature = temperature
         self.max_tokens = max_tokens
 
-    def get_description(self, objects: str):
+    def get_description(self, instruction: str, objects: str):
         payload = Chat(
             messages=[
                 Messages(
                     role=MessagesRole.SYSTEM,
-                    content=self.instruction
+                    content=instruction
                 )
             ],
             temperature=self.temperature,

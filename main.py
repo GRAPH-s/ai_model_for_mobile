@@ -13,13 +13,14 @@ class Objects(BaseModel):
     image_url: Union[str, None] = None
     accuracy_threshold: Union[float, None] = 0.85
     number_objects: Union[int, None] = 5
+    instruction: Union[str, None] = None
 
 
 load_dotenv(".env")
 CUDA = os.getenv("CUDA")
 app = FastAPI()
 sam = Sam(cuda=CUDA)
-
+chat = chat_description.Description()
 
 instruction_1 = """
 Тебе необходимо от первого лица создать креативное описание на русском языке к фотографии, 
@@ -28,7 +29,15 @@ instruction_1 = """
 Добавь 5 хэштегов на английском языке, чтобы повысить популярность поста. Используй эмоджи. 
 Хэштеги придумай исходя из контекста описания.
 """
-chat_1 = chat_description.Description(instruction=instruction_1)
+
+instruction_2 = """
+Тебе необходимо от первого лица продолжить описание на русском языке к фотографии, 
+чтобы потом выставить это описание в социальную сеть. Описание должно быть стильным, модным, молодежным. 
+Я тебе сначала дам начало описание, а после символа ; передам список объектов на фото. 
+Если слова будут на другом языке, то переведи их на русский. 
+Добавь 5 хэштегов на английском языке, чтобы повысить популярность поста. Используй эмоджи. 
+Хэштеги придумай исходя из контекста описания.
+"""
 
 
 @app.post("/api/without_input/")
@@ -40,24 +49,14 @@ def root(objects: Objects):
                                                accuracy_threshold=objects.accuracy_threshold,
                                                number_objects=objects.number_objects)
     objects_on_image = ", ".join(objects_on_image)
-    description = chat_1.get_description(objects_on_image)
+    instruction = instruction_1 if objects.instruction is None else objects.instruction
+    description = chat.get_description(instruction, objects_on_image)
     if len(objects_on_image) == 0:
         objects_on_image = f"Не смог ничего обнаружить с точностью: {objects.accuracy_threshold}"
         return JSONResponse(content={"detected objects": objects_on_image}, status_code=200)
     return JSONResponse(content={"description": description,
                                  "detected objects": objects_on_image},
                         status_code=200)
-
-
-instruction_2 = """
-Тебе необходимо от первого лица продолжить описание на русском языке к фотографии, 
-чтобы потом выставить это описание в социальную сеть. Описание должно быть стильным, модным, молодежным. 
-Я тебе сначала дам начало описание, а после символа ; передам список объектов на фото. 
-Если слова будут на другом языке, то переведи их на русский. 
-Добавь 5 хэштегов на английском языке, чтобы повысить популярность поста. Используй эмоджи. 
-Хэштеги придумай исходя из контекста описания.
-"""
-chat_2 = chat_description.Description(instruction=instruction_2)
 
 
 @app.post("/api/with_input/")
@@ -72,7 +71,8 @@ def root(objects: Objects):
                                                number_objects=objects.number_objects)
     objects_on_image = ", ".join(objects_on_image)
     beginning = objects.description + ";" + objects_on_image
-    description = chat_2.get_description(beginning)
+    instruction = instruction_2 if objects.instruction is None else objects.instruction
+    description = chat.get_description(instruction, beginning)
     if len(objects_on_image) == 0:
         objects_on_image = f"Не смог ничего обнаружить с точностью: {objects.accuracy_threshold}"
         return JSONResponse(content={"detected objects": objects_on_image}, status_code=200)
