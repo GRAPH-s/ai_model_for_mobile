@@ -16,7 +16,7 @@ GIGA_CREDENTIALS = os.getenv("GIGA_CREDENTIALS")
 
 
 class Description:
-    def __init__(self, temperature=0.7, max_tokens=300):
+    def __init__(self, temperature=1.7, max_tokens=300):
         self.temperature = temperature
         self.max_tokens = max_tokens
 
