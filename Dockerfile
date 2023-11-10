@@ -8,6 +8,6 @@ WORKDIR /app
 COPY . /app
 RUN pip install -r /app/requirements.txt
 RUN pip install --upgrade translators
-RUN wget -P /app https://storage.googleapis.com/sfr-vision-language-research/BLIP/models/model_base_capfilt_large.pth
+RUN pip install timm
 
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "80", "--reload"]
